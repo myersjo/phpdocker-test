@@ -1,0 +1,40 @@
+###############################################################################
+#                          Generated on phpdocker.io                          #
+###############################################################################
+
+ethics-canvas-mailhog:
+  image: phpdockerio/mailhog:latest
+  container_name: ethics-canvas-mailhog
+  ports:
+    - "9001:8025"
+
+ethics-canvas-mysql:
+  image: mysql:5.7
+  container_name: ethics-canvas-mysql
+  environment:
+    - MYSQL_ROOT_PASSWORD=P4ssw0rd1!
+    - MYSQL_DATABASE=ethics-canvas
+    - MYSQL_USER=dbadmin
+    - MYSQL_PASSWORD=P4ssw0rd1!
+
+ethics-canvas-webserver:
+  image: phpdockerio/nginx:latest
+  container_name: ethics-canvas-webserver
+  volumes:
+      - ..:/var/www/ethics-canvas
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+  ports:
+   - "9000:80"
+  links:
+   - ethics-canvas-php-fpm
+
+ethics-canvas-php-fpm:
+  build: .
+  dockerfile: php-fpm/Dockerfile
+  container_name: ethics-canvas-php-fpm
+  volumes:
+    - ..:/var/www/ethics-canvas
+    - ./php-fpm/php-ini-overrides.ini:/etc/php5/fpm/conf.d/99-overrides.ini
+  links:
+    - ethics-canvas-mailhog
+    - ethics-canvas-mysql
